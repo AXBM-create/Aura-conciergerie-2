@@ -9,9 +9,15 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as DashboardClientRouteImport } from './routes/dashboard-client'
 import { Route as ConnexionRouteImport } from './routes/connexion'
 import { Route as IndexRouteImport } from './routes/index'
 
+const DashboardClientRoute = DashboardClientRouteImport.update({
+  id: '/dashboard-client',
+  path: '/dashboard-client',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ConnexionRoute = ConnexionRouteImport.update({
   id: '/connexion',
   path: '/connexion',
@@ -26,31 +32,42 @@ const IndexRoute = IndexRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/connexion': typeof ConnexionRoute
+  '/dashboard-client': typeof DashboardClientRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/connexion': typeof ConnexionRoute
+  '/dashboard-client': typeof DashboardClientRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/connexion': typeof ConnexionRoute
+  '/dashboard-client': typeof DashboardClientRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/connexion'
+  fullPaths: '/' | '/connexion' | '/dashboard-client'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/connexion'
-  id: '__root__' | '/' | '/connexion'
+  to: '/' | '/connexion' | '/dashboard-client'
+  id: '__root__' | '/' | '/connexion' | '/dashboard-client'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ConnexionRoute: typeof ConnexionRoute
+  DashboardClientRoute: typeof DashboardClientRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/dashboard-client': {
+      id: '/dashboard-client'
+      path: '/dashboard-client'
+      fullPath: '/dashboard-client'
+      preLoaderRoute: typeof DashboardClientRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/connexion': {
       id: '/connexion'
       path: '/connexion'
@@ -71,6 +88,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ConnexionRoute: ConnexionRoute,
+  DashboardClientRoute: DashboardClientRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

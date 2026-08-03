@@ -34,7 +34,7 @@ function ConnectionPage() {
       </div>
 
       <div className="relative flex w-full flex-col items-center">
-        <AuthPanel initialMode={mode} onAuthenticated={() => navigate({ to: '/' })} />
+        <AuthPanel initialMode={mode} onAuthenticated={() => navigate({ to: '/dashboard-client' })} />
         <p className="mt-6 font-mono-tracked text-[9px] text-white/25">AURA PRIVATE CONCIERGE // SECURE ACCESS</p>
       </div>
     </main>
