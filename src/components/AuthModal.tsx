@@ -58,10 +58,18 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     e.preventDefault();
     setIsLoading(true);
 
+    // Validation des champs obligatoires pour signup
+    if ((mode === 'signup' || packageName) && (!firstName.trim() || !lastName.trim() || !email.trim() || !phone.trim())) {
+      console.error("[v0] Champs obligatoires vides - inscription non effectuée");
+      alert('Veuillez remplir tous les champs obligatoires');
+      setIsLoading(false);
+      return;
+    }
+
     if (mode === 'login' && !packageName) {
       // Direct login for existing members - sync with Supabase and grant dashboard access
       try {
-        await fetch('/api/register-client', {
+        const response = await fetch('/api/register-client', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -72,8 +80,12 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             packageName: 'Formule Existante',
           }),
         });
+        
+        if (!response.ok) {
+          throw new Error(`Erreur serveur: ${response.status}`);
+        }
       } catch (e) {
-        console.error("Erreur enregistrement Supabase login:", e);
+        console.error("[v0] Erreur enregistrement Supabase login:", e);
       }
 
       setTimeout(() => {
@@ -90,25 +102,36 @@ export const AuthModal: React.FC<AuthModalProps> = ({
     }
 
     let redirectUrl = '';
+    let checkoutError = false;
 
     try {
       if (mode === 'signup' || packageName) {
         // Submit registration data to backend for checkout session
+        console.log("[v0] Création session Stripe pour:", { firstName, lastName, email, packageName });
+        
         const response = await fetch('/api/create-checkout-session', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            firstName,
-            lastName,
-            email,
-            phone,
+            firstName: firstName.trim(),
+            lastName: lastName.trim(),
+            email: email.trim(),
+            phone: phone.trim(),
             packageName: packageName || 'Concierge Premium (29,99€/mois)',
           }),
         });
 
+        if (!response.ok) {
+          throw new Error(`Erreur Stripe: ${response.status} ${response.statusText}`);
+        }
+
         const data = await response.json();
+        console.log("[v0] Réponse checkout session:", data);
+        
         if (data.checkoutUrl) {
           redirectUrl = data.checkoutUrl;
+        } else {
+          throw new Error('Pas d\'URL de checkout reçue');
         }
       }
       
@@ -118,24 +141,35 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
       // Pause briefly for user to experience the confirmation & confetti
       setTimeout(() => {
+        setIsLoading(false);
         if (redirectUrl) {
-          window.location.href = redirectUrl;
+          console.log("[v0] Redirection vers Stripe:", redirectUrl);
+          // Check if we're in an iframe, if so open in new tab
+          if (window.self !== window.top) {
+            window.open(redirectUrl, '_blank');
+          } else {
+            window.location.href = redirectUrl;
+          }
         } else {
           onSuccess({ firstName, lastName, email, phone, packageName });
           setIsSuccessState(false);
         }
       }, 2000);
 
-    } catch (err) {
-      console.error('Subscription error:', err);
+    } catch (err: any) {
+      console.error('[v0] Erreur inscription/Stripe:', err);
+      checkoutError = true;
+      
+      // Even with error, show success state for UX but don't redirect to Stripe
       setIsSuccessState(true);
       triggerConfetti();
+      
       setTimeout(() => {
-        onSuccess({ firstName, lastName, email, phone, packageName });
+        setIsLoading(false);
+        alert(`Erreur: ${err.message || 'Impossible de créer la session de paiement'}`);
         setIsSuccessState(false);
+        onSuccess({ firstName, lastName, email, phone, packageName });
       }, 1800);
-    } finally {
-      setIsLoading(false);
     }
   };
 
