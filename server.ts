@@ -290,6 +290,12 @@ async function startServer() {
     try {
       const { firstName, lastName, email, phone, packageName } = req.body;
 
+      // Validation des données
+      if (!firstName || !lastName || !email || !phone) {
+        console.error("[Checkout] Données manquantes:", { firstName, lastName, email, phone });
+        return res.status(400).json({ error: "Données de client manquantes (firstName, lastName, email, phone)" });
+      }
+
       console.log(`[Subscription Request] Customer: ${firstName} ${lastName}, Email: ${email}, Phone: ${phone}, Package: ${packageName}`);
 
       // Auto-save to Supabase
@@ -303,6 +309,8 @@ async function startServer() {
           
           const priceAmount = packageName?.includes('VIP') ? 6999 : packageName?.includes('Basic') ? 0 : 2999;
           
+          console.log(`[Stripe] Création de session: email=${email}, montant=${priceAmount}cents, formule=${packageName}`);
+          
           const session = await stripe.checkout.sessions.create({
             payment_method_types: ['card'],
             customer_email: email,
@@ -313,6 +321,10 @@ async function startServer() {
                   product_data: {
                     name: `Aura Concierge - ${packageName || 'Concierge Premium'}`,
                     description: `Membre : ${firstName} ${lastName} (${phone})`,
+                    metadata: {
+                      member_email: email,
+                      member_phone: phone,
+                    },
                   },
                   unit_amount: priceAmount,
                   ...(priceAmount > 0 ? { recurring: { interval: 'month' } } : {}),
@@ -321,23 +333,40 @@ async function startServer() {
               },
             ],
             mode: priceAmount > 0 ? 'subscription' : 'payment',
-            success_url: `${req.headers.origin || 'http://localhost:3000'}/profil?checkout=success`,
+            success_url: `${req.headers.origin || 'http://localhost:3000'}/profil?checkout=success&session_id={CHECKOUT_SESSION_ID}`,
             cancel_url: `${req.headers.origin || 'http://localhost:3000'}/#pricing`,
+            metadata: {
+              customer_first_name: firstName,
+              customer_last_name: lastName,
+              customer_phone: phone,
+              package_name: packageName,
+            },
           });
 
-          res.json({ checkoutUrl: session.url });
+          console.log(`[Stripe] Session créée avec succès: ${session.id} - URL: ${session.url}`);
+          res.json({ 
+            checkoutUrl: session.url,
+            sessionId: session.id,
+            status: 'success',
+            message: "Session de paiement créée avec succès"
+          });
           return;
         } catch (stripeErr: any) {
+          console.error("[Stripe Error]", stripeErr.message || stripeErr);
           console.warn("Stripe Checkout creation failed, falling back to instant confirmation:", stripeErr.message || stripeErr);
         }
+      } else {
+        console.warn("[Stripe] Clé secrète invalide ou manquante");
       }
 
-      // Default redirection endpoint
+      // Fallback: Default redirection endpoint if Stripe fails
       const successRedirectUrl = `${req.headers.origin || 'http://localhost:3000'}/profil?subscription=success&name=${encodeURIComponent(`${firstName || ''}`)}`;
 
+      console.log("[Fallback] Utilisation du fallback pour redirection:", successRedirectUrl);
       res.json({
         checkoutUrl: successRedirectUrl,
-        message: "Redirection vers la confirmation de votre abonnement",
+        status: 'fallback',
+        message: "Redirection vers la confirmation de votre abonnement (mode fallback)",
         customer: { firstName, lastName, email, phone, packageName },
       });
     } catch (error: any) {
