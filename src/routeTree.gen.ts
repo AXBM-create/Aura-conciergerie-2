@@ -9,15 +9,9 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as EspaceClientRouteImport } from './routes/espace-client'
 import { Route as ConnexionRouteImport } from './routes/connexion'
 import { Route as IndexRouteImport } from './routes/index'
 
-const EspaceClientRoute = EspaceClientRouteImport.update({
-  id: '/espace-client',
-  path: '/espace-client',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ConnexionRoute = ConnexionRouteImport.update({
   id: '/connexion',
   path: '/connexion',
@@ -32,42 +26,31 @@ const IndexRoute = IndexRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/connexion': typeof ConnexionRoute
-  '/espace-client': typeof EspaceClientRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/connexion': typeof ConnexionRoute
-  '/espace-client': typeof EspaceClientRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/connexion': typeof ConnexionRoute
-  '/espace-client': typeof EspaceClientRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/connexion' | '/espace-client'
+  fullPaths: '/' | '/connexion'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/connexion' | '/espace-client'
-  id: '__root__' | '/' | '/connexion' | '/espace-client'
+  to: '/' | '/connexion'
+  id: '__root__' | '/' | '/connexion'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ConnexionRoute: typeof ConnexionRoute
-  EspaceClientRoute: typeof EspaceClientRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/espace-client': {
-      id: '/espace-client'
-      path: '/espace-client'
-      fullPath: '/espace-client'
-      preLoaderRoute: typeof EspaceClientRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/connexion': {
       id: '/connexion'
       path: '/connexion'
@@ -88,7 +71,6 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ConnexionRoute: ConnexionRoute,
-  EspaceClientRoute: EspaceClientRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

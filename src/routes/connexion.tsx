@@ -1,8 +1,6 @@
-import { useEffect } from 'react'
 import { createFileRoute, Link, useNavigate, useSearch } from '@tanstack/react-router'
 import { ArrowLeft } from 'lucide-react'
 import { AuthPanel } from '@/components/landing/AuthPanel'
-import { useAuth } from '@/lib/useAuth'
 
 export const Route = createFileRoute('/connexion')({
   validateSearch: (search: Record<string, unknown>) => ({
@@ -20,11 +18,6 @@ export const Route = createFileRoute('/connexion')({
 function ConnectionPage() {
   const { mode } = useSearch({ from: '/connexion' })
   const navigate = useNavigate()
-  const { user, isLoading } = useAuth()
-
-  useEffect(() => {
-    if (!isLoading && user) navigate({ to: '/espace-client', replace: true })
-  }, [isLoading, navigate, user])
 
   return (
     <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-background px-4 py-16 sm:px-6">
