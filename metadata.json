@@ -1,0 +1,6 @@
+{
+  "name": "Aura Concierge",
+  "description": "Conciergerie privée 24/7 - Assistant personnel et réseau d'experts pour vos réservations, voyages et imprévus.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
