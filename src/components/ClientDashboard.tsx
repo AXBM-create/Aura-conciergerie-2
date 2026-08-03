@@ -20,10 +20,10 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
   onUpgradePlan,
   onOpenChatBubble,
 }) => {
-  const [activeTab, setActiveTab] = useState<'overview' | 'supabase' | 'stripe'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'notion' | 'stripe'>('overview');
   const [isLoading, setIsLoading] = useState(true);
 
-  // Client & Integration state loaded from Server (Supabase & Stripe)
+  // Client & Integration state loaded from Server (Notion & Stripe)
   const [dashboardData, setDashboardData] = useState<{
     clientProfile: {
       id: string;
@@ -33,10 +33,10 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
       phone: string;
       packageName: string;
       createdAt: string;
-      supabaseSynced: boolean;
-      supabaseTable: string;
+      notionSynced: boolean;
+      notionDatabase: string;
     };
-    supabaseStatus: {
+    notionStatus: {
       connected: boolean;
       message: string;
     };
@@ -68,19 +68,19 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
     }>;
   }>({
     clientProfile: {
-      id: 'usr_sb_984210',
+      id: 'ntn_nc_984210',
       firstName: userProfile?.firstName || 'Alexandre',
       lastName: userProfile?.lastName || 'Dupont',
       email: userProfile?.email || 'alexandre.dupont@exemple.com',
       phone: userProfile?.phone || '+33 6 12 34 56 78',
       packageName: userProfile?.packageName || 'Concierge Premium (29,99€/mois)',
       createdAt: new Date().toISOString(),
-      supabaseSynced: true,
-      supabaseTable: 'clients',
+      notionSynced: true,
+      notionDatabase: 'Clients',
     },
-    supabaseStatus: {
+    notionStatus: {
       connected: true,
-      message: 'Base de données Supabase active - Table clients',
+      message: 'Base de données Notion active - Table Clients',
     },
     stripeSubscription: {
       status: 'active',
@@ -184,8 +184,8 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
     fetchDashboardData();
   }, [userProfile]);
 
-  // Handle saving profile changes to Supabase
-  const handleSaveProfileToSupabase = async (e: React.FormEvent) => {
+  // Handle saving profile changes to Notion
+  const handleSaveProfileToNotion = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSavingProfile(true);
 
@@ -212,13 +212,13 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
           lastName: editLastName,
           email: editEmail,
           phone: editPhone,
-          supabaseSynced: true,
+          notionSynced: true,
         },
       }));
 
-      onShowToast('✨ Données client synchronisées avec la table Supabase !');
+        onShowToast('✨ Données client synchronisées avec Notion !');
     } catch (err) {
-      console.error('Erreur sauvegarde Supabase:', err);
+        console.error('Erreur sauvegarde Notion:', err);
       onShowToast('Mise à jour locale effectuée.');
     } finally {
       setIsSavingProfile(false);
@@ -280,11 +280,9 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
 
           {/* Integration Status Badges */}
           <div className="flex items-center gap-3 flex-wrap z-10">
-            {/* Supabase Status Badge */}
-            <div className="bg-[#050505] border border-emerald-500/40 px-3.5 py-2 flex items-center gap-2 text-xs">
-              <i className="fa-solid fa-database text-emerald-400"></i>
-              <div>
-                <span className="text-[9px] text-white/40 uppercase font-mono-tracked block">Supabase Sync</span>
+{/* Notion Status Badge */}
+          <div className="absolute bottom-0 right-0 bg-gradient-to-l from-purple-500/20 to-transparent p-3 rounded">
+            <span className="text-[9px] text-white/40 uppercase font-mono-tracked block">Notion Sync</span>
                 <span className="text-emerald-400 font-bold uppercase text-[10px]">● Actif (table: clients)</span>
               </div>
             </div>
@@ -318,15 +316,14 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
           </button>
 
           <button
-            onClick={() => setActiveTab('supabase')}
-            className={`px-6 py-3.5 font-bold uppercase tracking-wider transition flex items-center gap-2 border-b-2 -mb-px whitespace-nowrap ${
-              activeTab === 'supabase'
-                ? 'border-emerald-400 text-emerald-400 bg-white/5'
-                : 'border-transparent text-white/60 hover:text-white'
-            }`}
-          >
-            <i className="fa-solid fa-database"></i>
-            <span>Données Supabase (Fiche Client)</span>
+        onClick={() => setActiveTab('notion')}
+        className={`px-3 py-2 text-sm transition ${
+          activeTab === 'notion'
+            ? 'bg-gradient-to-r from-purple-500 to-purple-600 text-white'
+            : 'text-slate-400 hover:text-white'
+        }`}
+      >
+        <span>Données Notion (Fiche Client)</span>
             <span className="bg-emerald-500/20 text-emerald-400 px-1.5 py-0.2 rounded text-[10px]">
               Live
             </span>
@@ -518,27 +515,18 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
         )}
 
         {/* TAB 2: SUPABASE CLIENT DATA */}
-        {activeTab === 'supabase' && (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-            
-            {/* Supabase Edit Profile Form */}
-            <div className="lg:col-span-8 bg-[#0b0b0e] p-6 sm:p-8 border border-white/10 space-y-6 shadow-2xl">
-              <div className="flex items-center justify-between border-b border-white/10 pb-4">
-                <div>
-                  <h3 className="text-lg font-black text-white uppercase font-syne flex items-center gap-2">
-                    <i className="fa-solid fa-database text-emerald-400"></i>
-                    <span>Fiche Client Supabase</span>
-                  </h3>
-                  <p className="text-xs text-white/50 mt-0.5">
-                    Modifiez vos données personnelles pour les synchroniser directement dans la base Supabase (table <code className="text-emerald-400">clients</code>).
-                  </p>
-                </div>
-                <span className="bg-emerald-500/20 text-emerald-400 text-[9px] font-bold uppercase px-2.5 py-1 font-mono-tracked border border-emerald-500/30">
-                  ● RLS Actif
-                </span>
-              </div>
+      {activeTab === 'notion' && (
+        <div className="bg-slate-700/30 border border-slate-600 rounded p-6 space-y-6">
+          {/* Notion Edit Profile Form */}
+          <div>
+            <h3 className="text-lg font-semibold mb-2">
+              <span>Fiche Client Notion</span>
+            </h3>
+            <p className="text-slate-400 text-sm mb-4">
+              Modifiez vos données personnelles pour les synchroniser directement dans la base Notion (table <code className="text-purple-400">Clients</code>).
+            </p>
 
-              <form onSubmit={handleSaveProfileToSupabase} className="space-y-4 text-xs">
+            <form onSubmit={handleSaveProfileToNotion} className="space-y-4 text-xs">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block font-bold text-white/80 uppercase tracking-wider text-[10px] font-mono-tracked mb-1">
@@ -568,7 +556,7 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
 
                 <div>
                   <label className="block font-bold text-white/80 uppercase tracking-wider text-[10px] font-mono-tracked mb-1">
-                    Adresse Email (Identifiant Unique Supabase)
+                    Adresse Email (Identifiant Unique Notion)
                   </label>
                   <input 
                     type="email" 
@@ -601,12 +589,12 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
                     {isSavingProfile ? (
                       <>
                         <i className="fa-solid fa-spinner animate-spin"></i>
-                        <span>Enregistrement dans Supabase...</span>
+                        <span>Enregistrement dans Notion...</span>
                       </>
                     ) : (
                       <>
                         <i className="fa-solid fa-cloud-arrow-up"></i>
-                        <span>Enregistrer & Synchroniser sur Supabase</span>
+                        <span>Enregistrer & Synchroniser sur Notion</span>
                       </>
                     )}
                   </button>
@@ -614,24 +602,24 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
               </form>
             </div>
 
-            {/* Supabase Technical Details Sidebar */}
+            {/* Notion Technical Details Sidebar */}
             <div className="lg:col-span-4 space-y-6">
               
               <div className="bg-[#0b0b0e] p-6 border border-white/10 space-y-4 shadow-xl">
                 <h4 className="text-xs font-black text-white uppercase font-syne tracking-wider flex items-center gap-2">
-                  <i className="fa-solid fa-code text-emerald-400"></i>
-                  <span>Métadonnées Supabase</span>
+                  <i className="fa-solid fa-code text-purple-400"></i>
+                  <span>Métadonnées Notion</span>
                 </h4>
 
                 <div className="space-y-3 text-xs font-mono-tracked">
                   <div className="bg-[#050505] p-3 border border-white/10 space-y-1">
-                    <span className="text-[9px] text-white/40 uppercase block">ID Client Supabase</span>
-                    <span className="text-emerald-400 font-bold select-all text-[11px]">{dashboardData.clientProfile.id}</span>
+                    <span className="text-[9px] text-white/40 uppercase block">ID Client Notion</span>
+                    <span className="text-purple-400 font-bold select-all text-[11px]">{dashboardData.clientProfile.id}</span>
                   </div>
 
                   <div className="bg-[#050505] p-3 border border-white/10 space-y-1">
-                    <span className="text-[9px] text-white/40 uppercase block">Table PostgreSQL</span>
-                    <span className="text-white font-bold text-[11px]">public.clients</span>
+                    <span className="text-[9px] text-white/40 uppercase block">Base Notion</span>
+                    <span className="text-white font-bold text-[11px]">Clients</span>
                   </div>
 
                   <div className="bg-[#050505] p-3 border border-white/10 space-y-1">
@@ -640,10 +628,10 @@ export const ClientDashboard: React.FC<ClientDashboardProps> = ({
                   </div>
                 </div>
 
-                <div className="bg-emerald-500/10 border border-emerald-500/30 p-3 text-[10px] text-emerald-300">
-                  <p className="font-bold uppercase">● Base de données synchronisée</p>
+                <div className="bg-purple-500/10 border border-purple-500/30 p-3 text-[10px] text-purple-300">
+                  <p className="font-bold uppercase">● Base de données Notion synchronisée</p>
                   <p className="text-white/60 mt-1">
-                    Chaque mise à jour du profil met automatiquement à jour la table PostgreSQL de votre application.
+                    Chaque mise à jour du profil met automatiquement à jour la base Notion de votre application.
                   </p>
                 </div>
               </div>

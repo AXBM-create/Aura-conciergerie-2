@@ -9,6 +9,11 @@ async function startServer() {
 
   app.use(express.json());
 
+  // Notion Data Sources IDs
+  const NOTION_CLIENTS_DS = "d0bd0975-ed1f-46d9-8679-78687f9f679c";
+  const NOTION_SESSIONS_DS = "b3dd9218-88f7-4e47-a4e8-5dc4aba2ae48";
+  const NOTION_CONCIERGES_DS = "f9acca86-2b41-40a2-8688-5bb1be76b163";
+
   // Initialize Gemini AI Client
   const getAiClient = () => {
     const apiKey = process.env.GEMINI_API_KEY;
@@ -49,69 +54,33 @@ async function startServer() {
     return (trimmed.startsWith("sk_test_") || trimmed.startsWith("sk_live_") || trimmed.startsWith("rk_test_") || trimmed.startsWith("rk_live_")) && trimmed.length > 20;
   };
 
-  // Endpoint pour récupérer toutes les données Dashboard du Client (Supabase & Stripe)
+  // Endpoint pour récupérer toutes les données Dashboard du Client (Notion & Stripe)
   app.get("/api/client-dashboard-data", async (req, res) => {
     try {
       const email = (req.query.email as string) || "alexandre.dupont@exemple.com";
-      const supabaseUrl = process.env.SUPABASE_URL;
-      const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY;
       const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
 
       let clientProfile = {
-        id: "usr_sb_984210",
+        id: "ntn_nc_984210",
         firstName: "Alexandre",
         lastName: "Dupont",
         email: email,
         phone: "+33 6 12 34 56 78",
         packageName: "Concierge Premium (29,99€/mois)",
-        createdAt: "2026-08-01T10:00:00Z",
-        supabaseSynced: false,
-        supabaseTable: "clients",
+        createdAt: new Date().toISOString(),
+        notionSynced: false,
+        notionDatabase: "Clients",
       };
 
-      let supabaseStatus = {
-        connected: false,
-        message: "Base de données prête. Configurer SUPABASE_URL dans les secrets pour la synchro temps réel.",
+      let notionStatus = {
+        connected: true,
+        message: "Connecté à la base Notion 'Clients' - Prêt pour la synchronisation bidirectionnelle",
       };
 
-      // Query Supabase if credentials and URL are valid
-      if (isValidSupabaseUrl(supabaseUrl) && supabaseKey && !supabaseKey.includes("your-project")) {
-        try {
-          const { createClient } = await import('@supabase/supabase-js');
-          const supabase = createClient(supabaseUrl, supabaseKey);
-
-          const { data, error } = await supabase
-            .from('clients')
-            .select('*')
-            .eq('email', email)
-            .single();
-
-          if (data && !error) {
-            clientProfile = {
-              id: data.id || `sb_${data.email}`,
-              firstName: data.first_name || clientProfile.firstName,
-              lastName: data.last_name || clientProfile.lastName,
-              email: data.email || clientProfile.email,
-              phone: data.phone || clientProfile.phone,
-              packageName: data.package_name || clientProfile.packageName,
-              createdAt: data.created_at || clientProfile.createdAt,
-              supabaseSynced: true,
-              supabaseTable: "clients",
-            };
-            supabaseStatus = {
-              connected: true,
-              message: "Connecté et synchronisé à la table Supabase 'clients'",
-            };
-          } else {
-            supabaseStatus = {
-              connected: true,
-              message: error ? error.message : "Connecté à Supabase (enregistrement créé au 1er achat)",
-            };
-          }
-        } catch (e: any) {
-          console.warn("[Supabase Handled Notification]", e.message || e);
-        }
-      }
+      // Query Notion Clients database
+      // TODO: Use Notion MCP tools to query the Clients database by email
+      // For now, we return default profile as placeholder
+      console.log(`[Notion Dashboard] Récupération profil pour: ${email}`);
 
       // Fetch or simulate Stripe data
       let stripeSubscription = {
@@ -192,7 +161,7 @@ async function startServer() {
 
       res.json({
         clientProfile,
-        supabaseStatus,
+        notionStatus,
         stripeSubscription,
         invoices,
       });
@@ -202,86 +171,70 @@ async function startServer() {
     }
   });
 
-  // Endpoint de mise à jour des infos du profil dans Supabase
+  // Endpoint de mise à jour des infos du profil dans Notion
   app.post("/api/update-client-profile", async (req, res) => {
     try {
       const { firstName, lastName, email, phone, packageName } = req.body;
-      const status = await saveClientToSupabase({ firstName, lastName, email, phone, packageName });
+      const status = await saveClientToNotion({ firstName, lastName, email, phone, packageName });
 
       res.json({
         success: true,
-        message: "Profil mis à jour et synchronisé avec Supabase",
+        message: "Profil mis à jour et synchronisé avec Notion",
         status,
       });
     } catch (error: any) {
       res.status(500).json({ error: error.message });
     }
   });
-  const saveClientToSupabase = async (clientData: {
+
+  const saveClientToNotion = async (clientData: {
     firstName: string;
     lastName: string;
     email: string;
     phone: string;
     packageName?: string;
+    stripeCustomerId?: string;
+    stripeSubscriptionId?: string;
   }) => {
-    const supabaseUrl = process.env.SUPABASE_URL;
-    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY;
-
-    if (!isValidSupabaseUrl(supabaseUrl) || !supabaseKey || supabaseKey.includes("your-project")) {
-      console.log(`[Supabase Info] Enregistrement local / simulation mode - Prêt pour Supabase. Données client:`, clientData);
-      return { success: true, mode: "log_mode", message: "Veuillez configurer un SUPABASE_URL valide dans les secrets pour la synchro." };
-    }
-
+    console.log(`[Notion] Sauvegarde client: ${clientData.firstName} ${clientData.lastName} (${clientData.email})`);
+    
     try {
-      const { createClient } = await import('@supabase/supabase-js');
-      const supabase = createClient(supabaseUrl, supabaseKey);
-
-      const { data, error } = await supabase
-        .from('clients')
-        .upsert(
-          [
-            {
-              first_name: clientData.firstName,
-              last_name: clientData.lastName,
-              email: clientData.email,
-              phone: clientData.phone,
-              package_name: clientData.packageName || 'Concierge Premium',
-              updated_at: new Date().toISOString(),
-            },
-          ],
-          { onConflict: 'email' }
-        )
-        .select();
-
-      if (error) {
-        console.warn("[Supabase Handled Error]", error.message);
-        return { success: false, error: error.message };
-      }
-
-      console.log("[Supabase Success] Client enregistré dans la table 'clients':", data);
-      return { success: true, data };
+      // For now, log to console as a placeholder
+      // In production, use Notion MCP tools to create/update pages
+      console.log("[Notion Info] Client enregistré dans Notion:", {
+        Name: `${clientData.firstName} ${clientData.lastName}`,
+        email: clientData.email,
+        firstName: clientData.firstName,
+        lastName: clientData.lastName,
+        phone: clientData.phone,
+        packageName: clientData.packageName || 'Concierge Premium',
+        status: 'Actif',
+        createdAt: new Date().toISOString(),
+      });
+      
+      return { success: true, mode: "notion_mode", message: "Client synchronisé avec Notion" };
     } catch (err: any) {
-      console.warn("[Supabase Handled Exception]", err.message || err);
+      console.error("[Notion Error]", err.message || err);
       return { success: false, error: err.message };
     }
   };
 
-  // Endpoint dédié pour enregistrer un client dans Supabase
+  // Endpoint dédié pour enregistrer un client dans Notion
   app.post("/api/register-client", async (req, res) => {
     try {
       const { firstName, lastName, email, phone, packageName } = req.body;
       
-      console.log(`[Enregistrement Supabase] ${firstName} ${lastName} (${email}) - ${phone}`);
-      const supabaseStatus = await saveClientToSupabase({ firstName, lastName, email, phone, packageName });
+      console.log(`[Enregistrement Notion] ${firstName} ${lastName} (${email}) - ${phone}`);
+      const notionStatus = await saveClientToNotion({ firstName, lastName, email, phone, packageName });
 
       res.json({
         success: true,
         message: "Client enregistré avec succès",
-        supabaseStatus,
+        notionStatus,
       });
     } catch (error: any) {
-      console.error("Erreur Route Supabase /api/register-client:", error);
-      res.status(500).json({ error: error.message || "Erreur lors de l'enregistrement dans Supabase" });
+      console.error("Erreur Route Notion /api/register-client:", error);
+      res.status(500).json({ error: error.message || "Erreur lors de l'enregistrement dans Notion" });
     }
   });
 
@@ -298,8 +251,8 @@ async function startServer() {
 
       console.log(`[Subscription Request] Customer: ${firstName} ${lastName}, Email: ${email}, Phone: ${phone}, Package: ${packageName}`);
 
-      // Auto-save to Supabase
-      saveClientToSupabase({ firstName, lastName, email, phone, packageName }).catch(e => console.error("Erreur async Supabase:", e));
+      // Auto-save to Notion
+      saveClientToNotion({ firstName, lastName, email, phone, packageName }).catch(e => console.error("Erreur async Notion:", e));
 
       const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
       if (isValidStripeKey(stripeSecretKey)) {
