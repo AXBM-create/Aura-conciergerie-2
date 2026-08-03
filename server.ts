@@ -420,16 +420,53 @@ async function startServer() {
       appType: "spa",
     });
     app.use(vite.middlewares);
+    
+    // SPA fallback - serve index.html for all non-API routes
+    app.use((req, res, next) => {
+      if (req.path.startsWith('/api/')) {
+        return next();
+      }
+      if (req.path.includes('.')) {
+        // Skip static files (js, css, etc)
+        return next();
+      }
+      // Serve index.html for all other routes (let React Router handle it)
+      vite.transformIndexHtml(req.originalUrl, `
+        <!DOCTYPE html>
+        <html lang="en">
+          <head>
+            <meta charset="UTF-8" />
+            <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+            <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+            <title>Aura Concierge</title>
+          </head>
+          <body>
+            <div id="root"></div>
+            <script type="module" src="/src/main.tsx"></script>
+          </body>
+        </html>
+      `).then(html => {
+        res.type('html').end(html);
+      }).catch(err => {
+        console.error("[v0] Error transforming index.html:", err);
+        next(err);
+      });
+    });
   } else {
     const distPath = path.join(process.cwd(), "dist");
     app.use(express.static(distPath));
-    app.get("*", (_req, res) => {
+    
+    // SPA fallback - serve index.html for all non-API routes
+    app.get("*", (req, res) => {
+      if (req.path.startsWith('/api/')) {
+        return res.status(404).json({ error: 'API route not found' });
+      }
       res.sendFile(path.join(distPath, "index.html"));
     });
   }
 
   app.listen(PORT, "0.0.0.0", () => {
-    console.log(`Server running on http://localhost:${PORT}`);
+    console.log(`[Server] Aura Concierge running on http://localhost:${PORT}`);
   });
 }
 
