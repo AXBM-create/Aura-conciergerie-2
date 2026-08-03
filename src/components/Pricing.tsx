@@ -60,12 +60,14 @@ export const Pricing: React.FC<PricingProps> = ({ onSelectPackage }) => {
                 <li className="flex items-center gap-2.5"><span className="text-brand-orange">✓</span> WhatsApp & Notes Vocales Directes</li>
               </ul>
             </div>
-            <button 
-              onClick={() => onSelectPackage('Standard')} 
-              className="w-full bg-brand-orange hover:bg-orange-600 text-white font-black py-3.5 text-xs uppercase tracking-widest transition shadow-lg"
+            <a 
+              href="https://buy.stripe.com/test_aFa7sK9i2gf5gidbk62wU00" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="w-full gradient-btn-orange text-white font-bold py-3.5 rounded-2xl transition text-sm text-center block"
             >
-              S'abonner (7 Jours Gratuits)
-            </button>
+              S'abonner (29,99€ / mois)
+            </a>
           </div>
 
           {/* Package 3 */}
