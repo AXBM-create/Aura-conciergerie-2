@@ -12,8 +12,8 @@ import { Footer } from '@/components/landing/Footer'
 export const Route = createFileRoute('/')({
   head: () => ({
     meta: [
-      { title: 'Conciergely — Votre concierge personnel 24/7' },
-      { name: 'description', content: 'Conciergely orchestre vos demandes en temps réel : voyages, gastronomie, shopping et intendance avec un concierge dédié.' },
+      { title: 'AURA Concierge — Votre concierge personnel 24/7' },
+      { name: 'description', content: 'AURA orchestre vos demandes en temps réel : voyages, gastronomie, shopping et intendance avec un concierge dédié.' },
     ],
   }),
   component: Home,

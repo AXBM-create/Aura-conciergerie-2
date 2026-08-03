@@ -23,7 +23,7 @@ export function Navbar() {
         <button onClick={() => scrollTo('#hero')} className="group flex flex-col text-left" aria-label="Retour à l'accueil">
           <span className="font-mono-tracked text-[9px] text-white/40">Private Concierge 24/7</span>
           <span className="mt-0.5 font-display text-2xl font-black italic tracking-tighter text-white">
-            CONCIERGELY<span className="text-primary">.</span>
+            AURA<span className="text-primary">.</span>
             <span className="ml-2 border-l border-white/20 pl-2 font-sans text-[10px] font-bold not-italic uppercase tracking-widest text-white/40">Studio</span>
           </span>
         </button>

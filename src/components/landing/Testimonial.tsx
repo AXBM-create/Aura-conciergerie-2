@@ -15,7 +15,7 @@ export function Testimonial() {
             &ldquo;
           </div>
           <p className="font-[Cormorant_Garamond] italic text-[clamp(22px,2.6vw,30px)] text-foreground leading-relaxed mb-7">
-            J&apos;ai demandé une table introuvable à 19 h pour 20 h. Conciergely m&apos;a confirmé une réservation en quatre minutes — sans que j&apos;aie eu à passer un seul appel.
+            J&apos;ai demandé une table introuvable à 19 h pour 20 h. AURA m&apos;a confirmé une réservation en quatre minutes — sans que j&apos;aie eu à passer un seul appel.
           </p>
           <div className="flex items-center justify-center gap-3">
             <div className="w-[38px] h-[38px] rounded-full bg-foreground flex items-center justify-center text-accent font-[Cormorant_Garamond] text-sm">

@@ -32,13 +32,13 @@ export const Route = createRootRoute({
     meta: [
       { charSet: 'utf-8' },
       { name: 'viewport', content: 'width=device-width, initial-scale=1.0' },
-      { title: 'Conciergely — Votre concierge personnel 24/7' },
-      { name: 'description', content: 'Conciergely orchestre vos demandes en temps réel : voyages, gastronomie, shopping et intendance avec un concierge dédié.' },
+      { title: 'AURA Concierge — Votre concierge personnel 24/7' },
+      { name: 'description', content: 'AURA orchestre vos demandes en temps réel : voyages, gastronomie, shopping et intendance avec un concierge dédié.' },
       { name: 'theme-color', content: '#050505' },
       { property: 'og:type', content: 'website' },
-      { property: 'og:title', content: 'Conciergely — Votre concierge personnel 24/7' },
-      { property: 'og:description', content: 'Conciergely orchestre vos demandes en temps réel : voyages, gastronomie, shopping et intendance avec un concierge dédié.' },
-      { property: 'og:site_name', content: 'Conciergely' },
+      { property: 'og:title', content: 'AURA Concierge — Votre concierge personnel 24/7' },
+      { property: 'og:description', content: 'AURA orchestre vos demandes en temps réel : voyages, gastronomie, shopping et intendance avec un concierge dédié.' },
+      { property: 'og:site_name', content: 'AURA Concierge' },
       { property: 'og:locale', content: 'fr_FR' },
       { name: 'twitter:card', content: 'summary_large_image' },
     ],
@@ -69,8 +69,8 @@ function RootDocument({ children }: { children: ReactNode }) {
             __html: JSON.stringify({
               '@context': 'https://schema.org',
               '@graph': [
-                { '@type': 'WebSite', name: 'Conciergely', url: '/', inLanguage: 'fr-FR' },
-                { '@type': 'Organization', name: 'Conciergely', url: '/', sameAs: [] },
+                { '@type': 'WebSite', name: 'AURA Concierge', url: '/', inLanguage: 'fr-FR' },
+                { '@type': 'Organization', name: 'AURA Concierge', url: '/', sameAs: [] },
               ],
             }),
           }}

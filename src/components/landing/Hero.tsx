@@ -19,7 +19,7 @@ export function Hero() {
         <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }} className="mx-auto flex max-w-4xl flex-col items-center space-y-8 text-center">
           <div className="gradient-badge inline-flex items-center gap-2 rounded-full px-4 py-1.5">
             <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-400" />
-            <span className="font-mono-tracked text-[10px] text-white/70">Conciergerie Privée Conciergely // 24/7 Available</span>
+            <span className="font-mono-tracked text-[10px] text-white/70">Conciergerie Privée AURA // 24/7 Available</span>
           </div>
 
           <div className="relative">
