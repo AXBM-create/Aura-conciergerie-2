@@ -2,6 +2,7 @@ import express from "express";
 import path from "path";
 import { createServer as createViteServer } from "vite";
 import { GoogleGenAI } from "@google/genai";
+import Stripe from "stripe";
 
 async function startServer() {
   const app = express();
@@ -124,7 +125,6 @@ async function startServer() {
       // If valid Stripe SDK key present, fetch real customer
       if (isValidStripeKey(stripeSecretKey)) {
         try {
-          const { default: Stripe } = await import("stripe");
           const stripe = new Stripe(stripeSecretKey!);
 
           const customers = await stripe.customers.list({ email: email, limit: 1 });
@@ -257,7 +257,6 @@ async function startServer() {
       const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
       if (isValidStripeKey(stripeSecretKey)) {
         try {
-          const { default: Stripe } = await import("stripe");
           const stripe = new Stripe(stripeSecretKey!);
           
           const priceAmount = packageName?.includes('VIP') ? 6999 : packageName?.includes('Basic') ? 0 : 2999;
