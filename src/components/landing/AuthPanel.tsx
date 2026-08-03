@@ -35,8 +35,7 @@ export function AuthPanel({ initialMode, onAuthenticated }: AuthPanelProps) {
     try {
       if (isSignup) {
         await blink.auth.signUp({ email, password, metadata: { displayName: name } })
-        setSuccess('Votre compte est créé. Vérifiez votre adresse email pour l’activer.')
-        setPassword('')
+        onAuthenticated()
       } else {
         await blink.auth.signInWithEmail(email, password)
         onAuthenticated()
@@ -53,6 +52,7 @@ export function AuthPanel({ initialMode, onAuthenticated }: AuthPanelProps) {
     setIsSubmitting(true)
     try {
       await blink.auth.signInWithGoogle()
+      onAuthenticated()
     } catch (caughtError) {
       setError(caughtError instanceof Error ? caughtError.message : 'La connexion Google a échoué.')
       setIsSubmitting(false)

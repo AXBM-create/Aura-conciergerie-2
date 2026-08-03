@@ -36,9 +36,9 @@ export function Navbar() {
               {link.label}
             </button>
           ))}
-          <button onClick={() => scrollTo('#client')} className="flex items-center gap-1.5 text-primary transition hover:text-accent">
+          <a href="/espace-client" className="flex items-center gap-1.5 text-primary transition hover:text-accent">
             <Gauge size={13} /> Espace Client
-          </button>
+          </a>
         </nav>
 
         <div className="hidden items-center gap-3 sm:flex">
@@ -60,7 +60,7 @@ export function Navbar() {
           <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="border-t border-white/10 bg-background md:hidden">
             <nav className="flex flex-col gap-2 px-5 py-5 text-left text-xs font-bold uppercase tracking-[0.18em] text-white/70">
               {links.map((link) => <button key={link.href} onClick={() => scrollTo(link.href)} className="py-2 text-left hover:text-white">{link.label}</button>)}
-              <a href="/connexion?mode=login" onClick={() => setMobileOpen(false)} className="py-2 text-left text-primary">Espace Client</a>
+              <a href="/espace-client" onClick={() => setMobileOpen(false)} className="py-2 text-left text-primary">Espace Client</a>
               <a href="/connexion?mode=signup" onClick={() => setMobileOpen(false)} className="mt-2 bg-white px-4 py-3 text-left text-black">Rejoindre le Club VIP →</a>
             </nav>
           </motion.div>
