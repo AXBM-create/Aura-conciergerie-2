@@ -64,7 +64,7 @@ export function AuthModal({ mode, onModeChange, onClose, onAuthenticated }: Auth
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-4 backdrop-blur-md" role="dialog" aria-modal="true" aria-labelledby="auth-title">
       <button className="absolute inset-0 cursor-default" onClick={onClose} aria-label="Fermer" />
-      <div className="relative z-10 w-full max-w-md border border-white/15 bg-[#0b0b0e] p-6 shadow-2xl sm:p-8">
+      <div className="relative z-10 w-full max-w-md translate-y-6 border border-white/15 bg-[#0b0b0e] p-6 shadow-2xl sm:p-8">
         <button onClick={onClose} className="absolute right-4 top-4 p-2 text-white/40 transition hover:text-white" aria-label="Fermer la fenêtre">
           <X size={18} />
         </button>
