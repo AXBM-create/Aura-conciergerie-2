@@ -1,10 +1,7 @@
 import { motion } from 'framer-motion'
 import { ArrowRight } from 'lucide-react'
-import { useState } from 'react'
-import { AuthModal } from './AuthModal'
 
 export function CTAFinal() {
-  const [authMode, setAuthMode] = useState<'login' | 'signup' | null>(null)
   const scrollTo = (href: string) => {
     const el = document.querySelector(href)
     if (el) el.scrollIntoView({ behavior: 'smooth' })
@@ -29,7 +26,7 @@ export function CTAFinal() {
         </p>
         <div className="flex gap-4 justify-center flex-wrap">
           <button
-            onClick={() => setAuthMode('signup')}
+            onClick={() => { window.location.href = '/connexion?mode=signup' }}
             className="bg-primary text-white border-none rounded-2xl px-8 py-4 text-[14.5px] font-bold tracking-wide cursor-pointer transition-all duration-200 hover:bg-accent hover:-translate-y-0.5 hover:shadow-[0_14px_36px_rgba(184,151,90,0.28)]"
           >
             Réserver mon accès
@@ -43,14 +40,6 @@ export function CTAFinal() {
           </button>
         </div>
       </motion.div>
-      {authMode && (
-        <AuthModal
-          mode={authMode}
-          onModeChange={setAuthMode}
-          onClose={() => setAuthMode(null)}
-          onAuthenticated={() => setAuthMode(null)}
-        />
-      )}
     </section>
   )
 }
