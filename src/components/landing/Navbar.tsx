@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Gauge, Menu, X } from 'lucide-react'
+import { AuthModal } from './AuthModal'
+import { useAuth } from '@/lib/useAuth'
 
 const links = [
   { href: '#hero', label: 'Accueil' },
@@ -10,6 +12,8 @@ const links = [
 
 export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [authMode, setAuthMode] = useState<'login' | 'signup' | null>(null)
+  const { user } = useAuth()
 
   const scrollTo = (href: string) => {
     setMobileOpen(false)
@@ -40,10 +44,10 @@ export function Navbar() {
         </nav>
 
         <div className="hidden items-center gap-3 sm:flex">
-          <button onClick={() => scrollTo('#pricing')} className="border border-white/15 px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-white/50 transition hover:border-primary hover:text-primary">
-            Connexion
+          <button onClick={() => setAuthMode('login')} className="border border-white/15 px-3 py-2 text-[10px] font-bold uppercase tracking-wider text-white/50 transition hover:border-primary hover:text-primary">
+            {user ? 'Compte actif' : 'Connexion'}
           </button>
-          <button onClick={() => scrollTo('#pricing')} className="bg-white px-5 py-2.5 text-xs font-black uppercase tracking-widest text-black transition hover:bg-neutral-200">
+          <button onClick={() => setAuthMode('signup')} className="bg-white px-5 py-2.5 text-xs font-black uppercase tracking-widest text-black transition hover:bg-neutral-200">
             Club VIP <span className="ml-1">→</span>
           </button>
         </div>
@@ -58,12 +62,21 @@ export function Navbar() {
           <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="border-t border-white/10 bg-background md:hidden">
             <nav className="flex flex-col gap-2 px-5 py-5 text-left text-xs font-bold uppercase tracking-[0.18em] text-white/70">
               {links.map((link) => <button key={link.href} onClick={() => scrollTo(link.href)} className="py-2 text-left hover:text-white">{link.label}</button>)}
-              <button onClick={() => scrollTo('#client')} className="py-2 text-left text-primary">Espace Client</button>
-              <button onClick={() => scrollTo('#pricing')} className="mt-2 bg-white px-4 py-3 text-left text-black">Rejoindre le Club VIP →</button>
+              <button onClick={() => { setMobileOpen(false); setAuthMode('login') }} className="py-2 text-left text-primary">Espace Client</button>
+              <button onClick={() => { setMobileOpen(false); setAuthMode('signup') }} className="mt-2 bg-white px-4 py-3 text-left text-black">Rejoindre le Club VIP →</button>
             </nav>
           </motion.div>
         )}
       </AnimatePresence>
+
+      {authMode && (
+        <AuthModal
+          mode={authMode}
+          onModeChange={setAuthMode}
+          onClose={() => setAuthMode(null)}
+          onAuthenticated={() => setAuthMode(null)}
+        />
+      )}
     </header>
   )
 }

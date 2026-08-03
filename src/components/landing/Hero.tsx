@@ -1,5 +1,7 @@
 import { motion } from 'framer-motion'
 import { ArrowRight, Bolt, MessageCircle, ShieldCheck, UserRound } from 'lucide-react'
+import { useState } from 'react'
+import { AuthModal } from './AuthModal'
 
 const proofCards = [
   { icon: Bolt, title: 'Réponse Instantanée', text: 'Prise en charge de vos requêtes en moins de 45 secondes par notre réseau de concierges.' },
@@ -8,6 +10,7 @@ const proofCards = [
 ]
 
 export function Hero() {
+  const [authMode, setAuthMode] = useState<'login' | 'signup' | null>(null)
   const scrollTo = (href: string) => document.querySelector(href)?.scrollIntoView({ behavior: 'smooth' })
 
   return (
@@ -35,7 +38,7 @@ export function Hero() {
           </p>
 
           <div className="flex w-full flex-col items-center justify-center gap-4 pt-2 sm:w-auto sm:flex-row">
-            <button onClick={() => scrollTo('#pricing')} className="flex w-full items-center justify-center gap-3 bg-white px-8 py-4 text-xs font-black uppercase tracking-widest text-black shadow-xl transition hover:bg-neutral-200 sm:w-auto">
+            <button onClick={() => setAuthMode('signup')} className="flex w-full items-center justify-center gap-3 bg-white px-8 py-4 text-xs font-black uppercase tracking-widest text-black shadow-xl transition hover:bg-neutral-200 sm:w-auto">
               <MessageCircle size={15} className="text-primary" /> Réserver une demande
             </button>
             <button onClick={() => scrollTo('#pricing')} className="flex w-full items-center justify-center gap-2 border border-white/20 bg-transparent px-8 py-4 text-xs font-bold uppercase tracking-widest text-white transition hover:bg-white/5 sm:w-auto">
@@ -59,6 +62,14 @@ export function Hero() {
           </div>
         </motion.div>
       </div>
+      {authMode && (
+        <AuthModal
+          mode={authMode}
+          onModeChange={setAuthMode}
+          onClose={() => setAuthMode(null)}
+          onAuthenticated={() => setAuthMode(null)}
+        />
+      )}
     </section>
   )
 }

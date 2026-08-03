@@ -1,5 +1,7 @@
 import { motion } from 'framer-motion'
 import { Check, Star } from 'lucide-react'
+import { useState } from 'react'
+import { AuthModal } from './AuthModal'
 
 const plans = [
   { label: 'Basic // 01', name: 'Découverte', price: '0€', features: ['5 demandes de conciergerie / mois', 'Recherche de voyages & restaurants'], button: 'Commencer gratuitement' },
@@ -8,6 +10,8 @@ const plans = [
 ]
 
 export function Pricing() {
+  const [authMode, setAuthMode] = useState<'login' | 'signup' | null>(null)
+
   return (
     <section id="pricing" className="relative border-t border-white/10 bg-background py-24">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -28,11 +32,19 @@ export function Pricing() {
                   {plan.features.map((feature) => <li key={feature} className="flex items-center gap-2.5"><Check size={14} className="text-primary" />{feature}</li>)}
                 </ul>
               </div>
-              <button onClick={() => document.querySelector('#hero')?.scrollIntoView({ behavior: 'smooth' })} className={`w-full py-3.5 text-xs font-bold uppercase tracking-widest transition ${plan.featured ? 'rounded-2xl bg-primary text-white hover:bg-orange-600' : 'bg-white/10 text-white hover:bg-white hover:text-black'}`}>{plan.button}</button>
+              <button onClick={() => setAuthMode('signup')} className={`w-full py-3.5 text-xs font-bold uppercase tracking-widest transition ${plan.featured ? 'rounded-2xl bg-primary text-white hover:bg-orange-600' : 'bg-white/10 text-white hover:bg-white hover:text-black'}`}>{plan.button}</button>
             </motion.article>
           ))}
         </div>
       </div>
+      {authMode && (
+        <AuthModal
+          mode={authMode}
+          onModeChange={setAuthMode}
+          onClose={() => setAuthMode(null)}
+          onAuthenticated={() => setAuthMode(null)}
+        />
+      )}
     </section>
   )
 }
