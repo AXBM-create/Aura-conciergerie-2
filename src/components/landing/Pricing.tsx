@@ -1,13 +1,44 @@
+import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { Check, Star } from 'lucide-react'
+import { Check, LoaderCircle, Star } from 'lucide-react'
+import { createCheckoutSession } from '@/lib/stripeCheckout'
 
 const plans = [
-  { label: 'Basic // 01', name: 'Découverte', price: '0€', features: ['5 demandes de conciergerie / mois', 'Recherche de voyages & restaurants'], button: 'Commencer gratuitement' },
-  { label: 'Standard // 02', name: 'Concierge Premium', price: '29,99€', featured: true, features: ['Demandes illimitées 24/7', 'Concierge humain dédié (appels & suivi)', 'WhatsApp & notes vocales directes'], button: "S'abonner (29,99€ / mois)" },
-  { label: 'VIP // 03', name: 'VIP & Famille', price: '69,99€', features: ["Tout l'abonnement Premium", 'Concierge humain dédié exclusif'], button: 'Rejoindre le Club VIP' },
+  { id: 'discovery' as const, label: 'Basic // 01', name: 'Découverte', price: '0€', features: ['5 demandes de conciergerie / mois', 'Recherche de voyages & restaurants'], button: 'Commencer gratuitement' },
+  { id: 'premium' as const, label: 'Standard // 02', name: 'Concierge Premium', price: '29,99€', featured: true, features: ['Demandes illimitées 24/7', 'Concierge humain dédié (appels & suivi)', 'WhatsApp & notes vocales directes'], button: "S'abonner (29,99€ / mois)" },
+  { id: 'vip' as const, label: 'VIP // 03', name: 'VIP & Famille', price: '69,99€', features: ["Tout l'abonnement Premium", 'Concierge humain dédié exclusif'], button: 'Rejoindre le Club VIP' },
 ]
 
 export function Pricing() {
+  const [loadingPlan, setLoadingPlan] = useState<'premium' | 'vip' | null>(null)
+  const [error, setError] = useState('')
+
+  const handlePlanClick = async (plan: 'discovery' | 'premium' | 'vip') => {
+    if (plan === 'discovery') {
+      window.location.href = '/connexion?mode=signup'
+      return
+    }
+
+    setError('')
+    setLoadingPlan(plan)
+    const checkoutWindow = window.open('', '_blank')
+
+    try {
+      const checkoutUrl = await createCheckoutSession(plan)
+      if (checkoutWindow) {
+        checkoutWindow.opener = null
+        checkoutWindow.location.href = checkoutUrl
+      } else {
+        window.location.href = checkoutUrl
+      }
+    } catch (caughtError) {
+      checkoutWindow?.close()
+      setError(caughtError instanceof Error ? caughtError.message : 'Le paiement est momentanément indisponible.')
+    } finally {
+      setLoadingPlan(null)
+    }
+  }
+
   return (
     <section id="pricing" className="relative border-t border-white/10 bg-background py-24">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -16,6 +47,7 @@ export function Pricing() {
           <h2 className="font-display text-4xl font-black uppercase tracking-tighter text-white sm:text-5xl">Formules d&apos;Abonnement <span className="text-stroke">Club</span></h2>
         </motion.div>
 
+        {error && <p className="mx-auto mb-6 max-w-xl border border-red-400/30 bg-red-400/10 px-4 py-3 text-center text-xs text-red-200" role="alert">{error}</p>}
         <div className="grid grid-cols-1 items-stretch gap-8 md:grid-cols-3">
           {plans.map((plan, index) => (
             <motion.article key={plan.name} initial={{ opacity: 0, y: 18 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.55, delay: index * 0.08 }} className={`relative flex flex-col justify-between border p-8 ${plan.featured ? 'z-10 border-2 border-primary bg-[#0e0e12] shadow-2xl md:scale-105' : 'border-white/10 bg-card'}`}>
@@ -28,7 +60,10 @@ export function Pricing() {
                   {plan.features.map((feature) => <li key={feature} className="flex items-center gap-2.5"><Check size={14} className="text-primary" />{feature}</li>)}
                 </ul>
               </div>
-              <a href="/connexion?mode=signup" className={`flex w-full items-center justify-center py-3.5 text-xs font-bold uppercase tracking-widest transition ${plan.featured ? 'rounded-2xl bg-primary text-white hover:bg-orange-600' : 'bg-white/10 text-white hover:bg-white hover:text-black'}`}>{plan.button}</a>
+              <button type="button" onClick={() => handlePlanClick(plan.id)} disabled={loadingPlan !== null} className={`flex w-full items-center justify-center gap-2 py-3.5 text-xs font-bold uppercase tracking-widest transition disabled:cursor-wait disabled:opacity-60 ${plan.featured ? 'rounded-2xl bg-primary text-white hover:bg-orange-600' : 'bg-white/10 text-white hover:bg-white hover:text-black'}`}>
+                {loadingPlan === plan.id && <LoaderCircle size={14} className="animate-spin" />}
+                {plan.button}
+              </button>
             </motion.article>
           ))}
         </div>
